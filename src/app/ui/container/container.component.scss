@@ -1,0 +1,9 @@
+@import 'common';
+@import 'bootstrap/scss/containers';
+
+.container {
+  --#{$prefix}gutter-y: #{$container-padding-y};
+
+  padding-top: calc(var(--#{$prefix}gutter-y) * 0.5);
+  padding-bottom: calc(var(--#{$prefix}gutter-y) * 0.5);
+}

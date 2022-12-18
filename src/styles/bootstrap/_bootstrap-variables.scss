@@ -402,8 +402,8 @@ $position-values: (
 //
 // Settings for the `<body>` element.
 
-$body-bg: $white !default;
-$body-color: $gray-900 !default;
+$body-bg: $gray-900;
+$body-color: $gray-100;
 $body-text-align: null !default;
 
 // Links
@@ -470,7 +470,8 @@ $grid-row-columns: 6 !default;
 
 // Container padding
 
-$container-padding-x: $grid-gutter-width !default;
+$container-padding-x: $grid-gutter-width;
+$container-padding-y: $grid-gutter-width;
 
 // Components
 //
