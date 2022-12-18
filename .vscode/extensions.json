@@ -4,6 +4,7 @@
     "rust-lang.rust-analyzer",
     "esbenp.prettier-vscode",
     "editorconfig.editorconfig",
-    "bungcip.better-toml"
+    "bungcip.better-toml",
+    "angular.ng-template"
   ]
 }
