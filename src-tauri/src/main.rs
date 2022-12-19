@@ -3,12 +3,18 @@
     windows_subsystem = "windows"
 )]
 
-use std::sync::Arc;
-
 mod file_server;
-use file_server::FileServer;
+mod shutdown;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+use tokio::sync::{broadcast, mpsc};
+
+use file_server::run_file_server;
+use shutdown::Shutdown;
+
+fn main() {
+    let (shutdown_tx, _) = broadcast::channel(1);
+    let (shutdown_complete_tx, mut shutdown_complete_rx) = mpsc::channel(1);
+
     let app = tauri::Builder::default()
         .build(tauri::generate_context!())
         .expect("Error while building Tauri application");
@@ -16,24 +22,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let data_dir = app.path_resolver().app_data_dir().unwrap();
     let dapps_dir = data_dir.join("dapps");
 
-    let file_server = Arc::new(FileServer::new(dapps_dir.clone()));
-    let app_handle = Arc::new(app.handle());
+    {
+        let shutdown = Shutdown::new(shutdown_tx.subscribe(), shutdown_complete_tx.clone());
 
-    let ctrlc_app_handle = app_handle.clone();
-    let ctrlc_file_server = file_server.clone();
-    ctrlc::set_handler(move || {
-        ctrlc_file_server.stop();
-        ctrlc_app_handle.exit(0);
-    })
-    .expect("Error setting Ctrl-C handler");
+        tauri::async_runtime::spawn(async {
+            run_file_server(dapps_dir, shutdown).await;
+        });
+    }
 
-    let app_file_server = file_server.clone();
     app.run(move |_app_handle, event| match event {
         tauri::RunEvent::Exit {} => {
-            app_file_server.stop();
+            println!("Shutting down...");
+            let _ = shutdown_tx.send(());
+            let _ = shutdown_complete_rx.blocking_recv();
+            println!("Shutdown complete!");
         }
         _ => {}
     });
-
-    Ok(())
 }
