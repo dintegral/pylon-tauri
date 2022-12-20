@@ -3,6 +3,8 @@
     windows_subsystem = "windows"
 )]
 
+mod agent;
+mod canister;
 mod proxy_server;
 mod shutdown;
 

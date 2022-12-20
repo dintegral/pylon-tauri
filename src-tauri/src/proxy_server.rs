@@ -1,20 +1,46 @@
-use actix_web::{error::ErrorBadRequest, web, App, HttpRequest, HttpServer, Result};
+use actix_web::{
+    error::{ErrorBadGateway, ErrorBadRequest},
+    http::header::ContentType,
+    web, App, HttpRequest, HttpResponse, HttpServer, Result,
+};
+use ic_agent::export::Principal;
+use ic_utils::interfaces::http_request::HeaderField;
 
-use crate::shutdown::Shutdown;
+use crate::{agent::create_agent, canister::canister_http_request, shutdown::Shutdown};
 
-async fn route_handler(req: HttpRequest) -> Result<&'static str> {
-    println!("Req: {:?}", req);
+const DEFAULT_IC_GATEWAY: &str = "https://ic0.app";
 
+async fn route_handler(req: HttpRequest) -> Result<HttpResponse> {
     let canister_id = req
         .match_info()
         .get("canister_id")
         .ok_or(ErrorBadRequest("Path parameter canister_id is required"))?;
-    let path = req.match_info().get("path").unwrap_or("");
+    let canister_id = Principal::from_text(canister_id)
+        .map_err(|_| ErrorBadRequest("Path parameter canister_id must be a valid Principal"))?;
+    let path = req.match_info().get("path").unwrap_or("/");
 
-    println!("Canister ID: {}", canister_id);
-    println!("Path: {}", path);
+    let agent = create_agent(DEFAULT_IC_GATEWAY);
 
-    Ok("Hello World!")
+    let headers = req
+        .headers()
+        .iter()
+        .filter_map(|(name, value)| {
+            Some(HeaderField(
+                name.as_str().into(),
+                value.to_str().ok()?.into(),
+            ))
+        })
+        .collect();
+    let res = canister_http_request(&agent, &canister_id, &path, headers)
+        .await
+        .expect("Failed to fetch file");
+
+    let body = String::from_utf8(res.body)
+        .map_err(|_| ErrorBadGateway("Invalid utf-8 string returned from replica"))?;
+
+    Ok(HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(body))
 }
 
 pub async fn run_proxy_server(mut shutdown: Shutdown) {
