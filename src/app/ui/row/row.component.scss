@@ -1,12 +1,10 @@
 @import 'common';
-@import 'bootstrap/scss/containers';
 
 :host {
-  @extend .container;
+  @include make-row();
 
-  --#{$prefix}gutter-y: #{$container-padding-y};
+  --#{$prefix}gutter-y: #{$grid-gutter-width};
 
-  display: block;
   padding-bottom: calc(var(--#{$prefix}gutter-y) * 0.5);
   padding-top: calc(var(--#{$prefix}gutter-y) * 0.5);
 }

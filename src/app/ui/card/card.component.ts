@@ -2,11 +2,11 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-container',
+  selector: 'app-card',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './container.component.html',
-  styleUrls: ['./container.component.scss'],
+  templateUrl: './card.component.html',
+  styleUrls: ['./card.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ContainerComponent {}
+export class CardComponent {}
