@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { CardComponent } from '../ui/card';
-import { ColumnComponent } from '../ui/column';
-import { ContainerComponent } from '../ui/container';
-import { RowComponent } from '../ui/row';
+import {
+  RowComponent,
+  CardComponent,
+  ColumnComponent,
+  ContainerComponent,
+} from '../ui';
 
 @Component({
   selector: 'app-dashboard',

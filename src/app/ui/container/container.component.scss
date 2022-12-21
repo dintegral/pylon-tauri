@@ -2,11 +2,21 @@
 @import 'bootstrap/scss/containers';
 
 :host {
-  @extend .container;
-
   --#{$prefix}gutter-y: #{$container-padding-y};
 
   display: block;
-  padding-bottom: calc(var(--#{$prefix}gutter-y) * 0.5);
-  padding-top: calc(var(--#{$prefix}gutter-y) * 0.5);
+}
+
+:host(:not([full-width])) {
+  @extend .container;
+}
+
+:host([full-width]) {
+  @extend .container-fluid;
+}
+
+:host([vertical-spacing]) {
+  --#{$prefix}gutter-y: #{$container-padding-y};
+
+  padding-top: var(--#{$prefix}gutter-y);
 }
