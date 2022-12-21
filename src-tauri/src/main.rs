@@ -13,11 +13,9 @@ use tokio::sync::{broadcast, mpsc};
 use proxy_server::run_proxy_server;
 use shutdown::Shutdown;
 
-const NNS_CANISTER_ID: &'static str = "qoctq-giaaa-aaaaa-aaaea-cai";
-
 #[tauri::command]
-async fn open_dapp(handle: tauri::AppHandle) -> Result<(), tauri::Error> {
-    return match open_dapp_window(&handle, NNS_CANISTER_ID) {
+async fn open_dapp(handle: tauri::AppHandle, canister_id: String) -> Result<(), tauri::Error> {
+    return match open_dapp_window(&handle, &canister_id) {
         Ok(_) => Ok(()),
         Err(e) => Err(e),
     };

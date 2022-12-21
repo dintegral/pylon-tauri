@@ -7,7 +7,7 @@ import { TauriService } from './tauri.service';
 export class ApiService {
   constructor(private readonly tauriService: TauriService) {}
 
-  public openDapp(): Promise<void> {
-    return this.tauriService.invoke('open_dapp');
+  public openDapp(canisterId: string): Promise<void> {
+    return this.tauriService.invoke('open_dapp', { canisterId });
   }
 }
