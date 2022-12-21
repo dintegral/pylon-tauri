@@ -15,11 +15,34 @@ use shutdown::Shutdown;
 
 const NNS_CANISTER_ID: &'static str = "qoctq-giaaa-aaaaa-aaaea-cai";
 
+#[tauri::command]
+async fn open_dapp(handle: tauri::AppHandle) -> Result<(), tauri::Error> {
+    return match open_dapp_window(&handle, NNS_CANISTER_ID) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(e),
+    };
+}
+
+fn open_dapp_window(
+    handle: &tauri::AppHandle,
+    canister_id: &str,
+) -> Result<tauri::Window, tauri::Error> {
+    let url = format!("http://localhost:8080/{}", canister_id);
+
+    tauri::WindowBuilder::new(
+        handle,
+        canister_id,
+        tauri::WindowUrl::External(url.parse().unwrap()),
+    )
+    .build()
+}
+
 fn main() {
     let (shutdown_tx, _) = broadcast::channel(1);
     let (shutdown_complete_tx, mut shutdown_complete_rx) = mpsc::channel(1);
 
     let app = tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![open_dapp])
         .build(tauri::generate_context!())
         .expect("Error while building Tauri application");
 
@@ -30,15 +53,6 @@ fn main() {
             run_proxy_server(shutdown).await;
         });
     }
-
-    let url = format!("http://localhost:8080/{}", NNS_CANISTER_ID);
-    tauri::WindowBuilder::new(
-        &app,
-        "nns",
-        tauri::WindowUrl::External(url.parse().unwrap()),
-    )
-    .build()
-    .expect("Error while building Tauri window");
 
     app.run(move |_app_handle, event| match event {
         tauri::RunEvent::Exit {} => {
